@@ -1,0 +1,113 @@
+import os
+import time
+import subprocess
+
+# Clear the terminal
+os.system('clear')
+
+# Start time
+start_time = time.time()
+
+def print_time(message):
+    end_time = time.time()
+    diff_time = int(end_time - start_time)
+    minutes = diff_time // 60
+    seconds = diff_time % 60
+    formatted_time = f"{minutes:02}:{seconds:02} -- {message}"
+    
+    with open(os.path.expanduser('~/Desktop/Script.log'), 'a') as log_file:
+        log_file.write(formatted_time + '\n')
+
+# Create log file
+log_file_path = os.path.expanduser('~/Desktop/Script.log')
+with open(log_file_path, 'w') as log_file:
+    pass
+
+os.chmod(log_file_path, 0o777)
+
+# Check if script is run as root
+if os.geteuid() != 0:
+    print("This script must be run as root")
+    exit()
+
+print_time("Script is being run as root.")
+
+# Install gedit
+subprocess.run(['apt-get', 'install', 'gedit', '-y', '-qq'])
+os.system('clear')
+print_time("The current OS is Linux Mint.")
+
+# Create backups directory
+backups_dir = os.path.expanduser('~/Desktop/backups')
+os.makedirs(backups_dir, exist_ok=True)
+os.chmod(backups_dir, 0o777)
+print_time("Backups folder created on the Desktop.")
+
+# Backup group and passwd files
+subprocess.run(['cp', '/etc/group', backups_dir])
+os.chmod(os.path.join(backups_dir, 'group'), 0o777)
+subprocess.run(['cp', '/etc/passwd', backups_dir])
+os.chmod(os.path.join(backups_dir, 'passwd'), 0o777)
+
+print_time("/etc/group and /etc/passwd files backed up.")
+
+# Placeholder for user management
+# Assuming usersNew and users are defined somewhere in the original script
+# for i in range(len(usersNew)):
+#     subprocess.run(['passwd', '-x30', '-n3', '-w7', usersNew[i]])
+#     subprocess.run(['usermod', '-L', usersNew[i]])
+#     print_time(f"{usersNew[i]}'s password has been given a maximum age of 30 days, minimum of 3 days, and warning of 7 days. {users[i]}'s account has been locked.")
+
+# User input for services
+services = ['Samba', 'FTP', 'SSH', 'Telnet', 'Mail', 'Printing', 'MySQL', 'Web Server', 'DNS', 'Media Files']
+responses = {}
+
+for service in services:
+    response = input(f"Does this machine need {service}? (yes/no): ").strip().lower()
+    responses[service] = response
+
+os.system('clear')
+subprocess.run(['unalias', '-a'])
+print_time("All alias have been removed.")
+
+os.system('clear')
+subprocess.run(['usermod', '-L', 'root'])
+print_time("Root account has been locked.")
+
+os.system('clear')
+subprocess.run(['chmod', '640', '.bash_history'])
+print_time("Bash history file permissions set.")
+
+os.system('clear')
+subprocess.run(['chmod', '604', '/etc/shadow'])
+print_time("Read/Write permissions on shadow have been set.")
+
+os.system('clear')
+print_time("Check for any user folders that do not belong to any users.")
+subprocess.run(['ls', '-a', '/home/'], stdout=open(log_file_path, 'a'))
+
+os.system('clear')
+print_time("Check for any files for users that should not be administrators.")
+subprocess.run(['ls', '-a', '/etc/sudoers.d'], stdout=open(log_file_path, 'a'))
+
+os.system('clear')
+subprocess.run(['cp', '/etc/rc.local', backups_dir])
+with open('/etc/rc.local', 'w') as rc_file:
+    rc_file.write('exit 0\n')
+print_time("Any startup scripts have been removed.")
+
+os.system('clear')
+subprocess.run(['apt-get', 'install', 'ufw', '-y', '-qq'])
+subprocess.run(['ufw', 'enable'])
+subprocess.run(['ufw', 'deny', '1337'])
+print_time("Firewall enabled and port 1337 blocked.")
+
+os.system('clear')
+subprocess.run(['chmod', '777', '/etc/hosts'])
+subprocess.run(['cp', '/etc/hosts', backups_dir])
+with open('/etc/hosts', 'w') as hosts_file:
+    hosts_file.write("127.0.0.1 localhost\n")
+    hosts_file.write(f"127.0.1.1 {os.getenv('USER')}\n")
+    hosts_file.write("::1 ip6-localhost ip6-loopback\n")
+    hosts_file.write("fe00::0 ip6-localnet\n")
+    hosts_file.write
