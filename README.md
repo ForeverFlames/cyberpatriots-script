@@ -1,12 +1,12 @@
 # cyberpatriots-script
-Checklist:
-sudo apt-get update && sudo apt-get upgrade
-sudo apt-get install ufw && sudo ufw enable
-sudo apt-get install openssh-server*
-sudo nano /etc/ssh/sshd_config
-PermitRootLogin no
-Updates(Software & Updates < Set Security Updates to daily)
-sudo apt-get install apache2
+# Checklist:
+# sudo apt-get update && sudo apt-get upgrade
+# sudo apt-get install ufw && sudo ufw enable
+# sudo apt-get install openssh-server*
+# sudo nano /etc/ssh/sshd_config
+# PermitRootLogin no
+# Updates(Software & Updates < Set Security Updates to daily)
+# sudo apt-get install apache2
 sudo nano /etc/apache2/conf-available/security.conf
 ServerTokens ProductOnly
 sudo nano /etc/apache2/apache2.conf
