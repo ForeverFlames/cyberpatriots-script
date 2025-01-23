@@ -88,7 +88,7 @@ chmod 640 .bash_history
 printTime "Bash history file permissions set."
 
 clear
-chmod 604 /etc/shadow
+chmod 600 /etc/shadow
 printTime "Read/Write permissions on shadow have been set."
 
 clear
