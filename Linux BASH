@@ -583,31 +583,6 @@ printTime "Only root allowed in cron."
 
 chmod 777 /etc/apt/sources.list
 cp /etc/apt/sources.list ~/Desktop/backups/
-if [[ $(lsb_release -r) == "Release:	17.3" ]]
-then
-	echo -e "deb http://packages.linuxmint.com rosa main upstream import\ndeb http://extra.linuxmint.com rosa main\ndeb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu trsuty-updates main restricted universe multiverse\ndeb http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse\ndeb http://archive.canonical.com/ubuntu/ trusty partner" > /etc/apt/sources.list
-elif [[ $(lsb_release -r) == "Release:	17.2" ]]
-then
-	echo -e "deb http://packages.linuxmint.com rafaela main upstream import\ndeb http://extra.linuxmint.com rafaela main\ndeb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu trusty-updates main restricted universe multiverse\ndeb http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse\ndeb http://archive.canonical.com/ubuntu/ trusty partner" > /etc/apt/sources.list
-elif [[ $(lsb_release -r) == "Release:	17.1" ]]
-then
-	echo -e "deb http://packages.linuxmint.com rebecca main upstream import\ndeb http://extra.linuxmint.com rebecca main\ndeb http://archive.ubuntu.com/ubuntu trusty main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu trsuty-updates main restricted universe multiverse\ndeb http://security.ubuntu.com/ubuntu/ trusty-security main restricted universe multiverse\ndeb http://archive.canonical.com/ubuntu/ trusty partner" > /etc/apt/sources.list
-elif [[ $(lsb_release -r) == "Release:	16" ]]
-then
-	echo -e "deb http://packages.linuxmint.com petra main upstream import\ndeb http://extra.linuxmint.com petra main\ndeb http://archive.ubuntu.com/ubuntu saucy main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu saucy-updates main restricted universe multiverse\ndeb http://security.ubuntu.com/ubuntu/ saucy-security main restricted universe multiverse\ndeb http://archive.canonical.com/ubuntu/ saucy partner" > /etc/apt/sources.list
-elif [[ $(lsb_release -r) == "Release:	13" ]]
-then
-	echo -e "deb http://packages.linuxmint.com maya main upstream import\ndeb http://extra.linuxmint.com maya main\ndeb http://archive.ubuntu.com/ubuntu precise main restricted universe multiverse\ndeb http://archive.ubuntu.com/ubuntu precise-updates main restricted universe multiverse\ndeb http://security.ubuntu.com/ubuntu/ precise-security main restricted universe multiverse\ndeb http://archive.canonical.com/ubuntu/ precise partner" > /etc/apt/sources.list
-fi
-chmod 644 /etc/apt/sources.list
-printTime "Apt Repositories have been added."
-
-
-clear
-apt-get update -qq
-apt-get upgrade -qq
-apt-get dist-upgrade -qq
-printTime "Linux Mint OS has checked for updates and has been upgraded."
 
 clear
 chmod 777 /etc/apt/apt.conf.d/10periodic
