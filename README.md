@@ -1,4 +1,4 @@
-# Comprehensive Linux Checklist for CyberPatriot
+# Linux Checklist for CyberPatriot
 
 ## **General Setup**
 
