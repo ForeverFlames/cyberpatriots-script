@@ -1,82 +1,224 @@
-# Checklist:
-# sudo apt-get update && sudo apt-get upgrade
-# sudo apt-get install ufw && sudo ufw enable
-# sudo apt-get install openssh-server*
-# sudo nano /etc/ssh/sshd_config
-# PermitRootLogin no
-# Updates(Software & Updates < Set Security Updates to daily)
-# sudo apt-get install apache2
-# sudo nano /etc/apache2/conf-available/security.conf
-# ServerTokens ProductOnly
-# sudo nano /etc/apache2/apache2.conf
-# AllowOverride None
-# RequestReadTimeout header=10-20,MinRate=500 body=20,MinRate=500
-# TODO: NGINX
-# TODO: FTP
-# service –status-all
-# Remove (UNLESS REQUIRED IN README):
-# NGINX*
-# APACHE*
-# SSH*
-# VSFTPD (or anything that is ftp related)*
-# chmod -R 640 /etc/sudoers
-# chmod -R 640 /etc/group
-# chmod -R 640 /etc/passwd
-# chmod -R 640 /etc/shadow
-# sudo nano /etc/lightdm/lightdm.conf**
-# allow-guest=false
-# sudo nano /etc/crontab
-# Check for anything suspicious
-# sudo nano /etc/login.defs
-# Change:
-# PASS_MAX_DAY 90
-# PASS_MIN_DAY 10
-# PASS_WARN_AGE 7
-# Secure /etc/sysctl****
-# sudo find . -type f -exec file -N -i -- {} + | sed -n 's!: video/[^:]*$!!p'
-# Update the Kernel***
-# User Section:
-# Remove Unauthorized Users
-# Add Any Required Users in read-me
-# Remove permissions from unauthorized admins
-# Give admin to any user without it that is authorized
-# Change insecure password(s) of admin(s)
+# Comprehensive Linux Checklist for CyberPatriot
 
+## **General Setup**
 
+### 1. **Read the Readme**
+- Take notes on necessary services, users, and other important details.
 
+### 2. **Forensics Questions**
+- Answer forensic questions as they often point to vulnerabilities (e.g., hidden messages, backdoors, unauthorized files).
 
+---
 
-# *Depends on the required service
-# **Only if display manager is lightdm
-# ***Changes between flavors
-# ****#11 on Checklist #3
+## **Account Configuration**
 
+### 1. **Root and Guest Accounts**
+- Lock the root account:
+  ```bash
+  passwd -l root
+  ```
+- Disable the guest account in `/etc/lightdm/lightdm.conf`:
+  ```bash
+  allow-guest=false
+  greeter-hide-users=true
+  greeter-show-manual-login=true
+  autologin-user=none
+  ```
 
+### 2. **User Management**
+- Compare `/etc/passwd` and `/etc/group` to the Readme.
+  - Look out for UID 0 and hidden users.
+- Delete unauthorized users:
+  ```bash
+  userdel -r <username>
+  groupdel <username>
+  ```
+- Add authorized users:
+  ```bash
+  useradd -G <group1>,<group2> <username>
+  passwd <username>
+  ```
+- Manage group memberships:
+  ```bash
+  gpasswd -d <username> <group>   # Remove from group
+  gpasswd -a <username> <group>   # Add to group
+  ```
+- Verify `/etc/sudoers` and `/etc/sudoers.d` for unauthorized users or groups.
+  - Remove `NOPASSWD` and `!authenticate` entries.
 
+---
 
+## **Password Policy**
 
+### 1. **Password Expiration**
+- Edit `/etc/login.defs`:
+  ```bash
+  PASS_MAX_DAYS 30
+  PASS_MIN_DAYS 7
+  PASS_WARN_AGE 12
+  ```
 
-# CHECK NEXT PAGE FOR ADDITIONAL CHECKS
-# It might not be defined in the README but go through all of the files in the OS system and find some files that seem that they shouldn’t be on the OS system ex. Water bottle .jpeg, mp3 files. Some files may be hidden so you might have to use $ sudo ls -a OR $ ls -a.
+### 2. **Password Complexity**
+- Install Cracklib:
+  ```bash
+  apt-get install libpam-cracklib
+  ```
+- Edit `/etc/pam.d/common-password`:
+  ```bash
+  password required pam_unix.so obscure sha512 remember=12 use_authtok
+  password required pam_cracklib.so retry=3 minlen=13 difok=4 dcredit=-1 ucredit=-1 ocredit=-1 lcredit=-1 maxrepeat=3
+  ```
 
-# Disable rsh hosts as they are unencrypted- READ THIS
-# IgnoreRhosts yes
+### 3. **Account Lockout Policy**
+- Edit `/etc/pam.d/common-auth`:
+  ```bash
+  auth required pam_tally2.so deny=5 audit unlock_time=1800 onerr=fail even_deny_root
+  ```
 
-# Check list of installed packages for samba packages
-# sudo apt list | grep -i samba
+### 4. **Change Passwords**
+- Update all user passwords:
+  ```bash
+  passwd <username>
+  ```
 
-# Remove all samba related packages- 
-# sudo apt-get remove .*samba.* .*smb.*
+---
 
-# No keepalive/unattended sessions-’
-# ClientAliveInterval 300 ClientAliveCountMax 0
+## **Network Security**
 
-# Run check on sshd config- 
-# sudo sshd -t
+### 1. **Firewall Configuration (UFW)**
+- Enable and configure UFW:
+  ```bash
+  ufw default deny incoming
+  ufw default allow outgoing
+  ufw allow <port/service>
+  ufw delete <rule>
+  ufw logging on
+  ufw logging high
+  ufw enable
+  ```
 
-# Run rootkit, backdoor checks- 
-# sudo apt-get install chkrootkit rkhunter
-# sudo chkrootkit
-# sudo rkhunter --update
-# sudo rkhunter --check
+### 2. **Host Configuration**
+- Check `/etc/hosts` for suspicious entries.
+- Prevent IP spoofing:
+  ```bash
+  echo "nospoof on" >> /etc/host.conf
+  ```
 
+### 3. **Secure SSH (if required)**
+- Edit `/etc/ssh/sshd_config`:
+  ```bash
+  PermitRootLogin no
+  Protocol 2
+  MaxAuthTries 3
+  ClientAliveInterval 300
+  ClientAliveCountMax 0
+  LoginGraceTime 20
+  StrictModes yes
+  PasswordAuthentication no  # Optional for key-based authentication
+  ```
+- Restart SSH:
+  ```bash
+  service sshd restart
+  ```
+
+---
+
+## **Package Management**
+
+### 1. **Verify Repositories**
+- Check `/etc/apt/sources.list` and apt keys:
+  ```bash
+  apt-cache policy
+  apt-key list
+  ```
+
+### 2. **Updates**
+- Update and upgrade the system:
+  ```bash
+  apt-get update
+  apt-get -y upgrade
+  ```
+- Enable automatic updates:
+  ```bash
+  apt-get install unattended-upgrades
+  dpkg-reconfigure unattended-upgrades
+  ```
+- Configure `/etc/apt/apt.conf.d/20auto-upgrades`:
+  ```bash
+  APT::Periodic::Update-Package-Lists "1";
+  APT::Periodic::Download-Upgradeable-Packages "1";
+  APT::Periodic::AutocleanInterval "7";
+  APT::Periodic::Unattended-Upgrade "1";
+  ```
+
+---
+
+## **Service Management**
+
+### 1. **List and Remove Services**
+- List all services:
+  ```bash
+  service --status-all
+  ```
+- Remove unnecessary services:
+  ```bash
+  apt-get purge <service>
+  ```
+
+### 2. **Secure Configuration**
+- Verify service configuration files (e.g., Apache, SSH, FTP).
+- Ensure no default credentials are in use.
+
+---
+
+## **File and Permissions Management**
+
+### 1. **Sensitive Files**
+- Verify permissions for sensitive files:
+  ```bash
+  ls -al /etc/passwd /etc/group /etc/shadow /etc/sudoers /var/www
+  chmod -R 640 <file>
+  ```
+
+### 2. **Media Files**
+- Search for unauthorized media files:
+  ```bash
+  find / -iname "*.<extension>"
+  ls -alR /home
+  ```
+
+---
+
+## **Malware and Backdoor Detection**
+
+### 1. **Check for Malware**
+- Verify `/etc/rc.local` contains only `exit 0`.
+- Check running processes:
+  ```bash
+  ps -aux
+  ```
+- Install and run Rootkit Hunter:
+  ```bash
+  apt-get install rkhunter
+  rkhunter --propupd
+  rkhunter --checkall
+  ```
+
+### 2. **Install ClamAV**
+- Install and scan:
+  ```bash
+  apt-get install clamav
+  freshclam
+  clamscan -i -r --remove=yes /
+  ```
+
+---
+
+## **Notes**
+- Assume root permissions for most commands.
+- Be cautious with `dist-upgrade` as it may break critical services.
+- Use multiple terminals for parallel tasks when possible.
+
+---
+
+This checklist is designed for CyberPatriot Linux Hardening and should be adapted based on specific competition requirements and the Readme instructions provided.
